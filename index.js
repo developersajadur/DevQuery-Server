@@ -15,6 +15,7 @@ const io = new Server(server, {
     origin: process.env.WEB_URL_KEY,
     // origin: process.env.WEB_URL_KEY,
     methods: ["GET", "POST"],
+    credentials: true, 
   },
 });
 
