@@ -22,7 +22,12 @@ app.use(cors({
 // Socket.IO setup with CORS
 const io = new Server(server, {
   cors: {
-    origin: process.env.WEB_URL_KEY, // Your frontend URL
+    origin:   [
+      "http://localhost:3000",
+      "https://devquery-by-webcrafters.vercel.app",
+      "https://devquery-by-webcrafters.vercel.app/chat",
+      process.env.WEB_URL_KEY,
+    ], // Your frontend URL
     methods: ["GET", "POST"],
     credentials: true, // Allow credentials if needed
   },
