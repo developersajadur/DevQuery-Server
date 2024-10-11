@@ -8,7 +8,13 @@ const server = http.createServer(app);
 
 // Enable CORS
 app.use(cors({
-  origin: process.env.WEB_URL_KEY, // Your frontend URL
+  origin: 
+  [
+    "http://localhost:3000",
+    "https://devquery-by-webcrafters.vercel.app",
+    "https://devquery-by-webcrafters.vercel.app/chat",
+    process.env.WEB_URL_KEY,
+  ], // Your frontend URL
   methods: ["GET", "POST"],
   credentials: true, // Allow credentials if needed
 }));
