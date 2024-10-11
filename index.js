@@ -2,20 +2,23 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const app = express();
 require('dotenv').config();
+const app = express();
 const server = http.createServer(app);
 
-app.use(cors());
+// Enable CORS
+app.use(cors({
+  origin: process.env.WEB_URL_KEY, // Your frontend URL
+  methods: ["GET", "POST"],
+  credentials: true, // Allow credentials if needed
+}));
 
-// console.log("Web URL from ENV:", process.env.WEB_URL_KEY); 
-
+// Socket.IO setup with CORS
 const io = new Server(server, {
   cors: {
-    origin: process.env.WEB_URL_KEY,
-    // origin: process.env.WEB_URL_KEY,
+    origin: process.env.WEB_URL_KEY, // Your frontend URL
     methods: ["GET", "POST"],
-    credentials: true, 
+    credentials: true, // Allow credentials if needed
   },
 });
 
@@ -34,8 +37,6 @@ io.on("connection", (socket) => {
     const { room } = msgData;
     io.to(room).emit("message", msgData); // Broadcast the message to the room
   });
-
-  
 
   // Handle user disconnection
   socket.on("disconnect", () => {
