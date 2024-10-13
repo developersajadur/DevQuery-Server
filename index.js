@@ -13,6 +13,7 @@ app.use(cors({
   origin: [
     "http://localhost:3000",
     "https://devquery-by-webcrafters.vercel.app",
+    "https://devquery-by-webcrafters.vercel.app/chat",
     process.env.WEB_URL_KEY,
   ],
   methods: ["GET", "POST"],
@@ -25,6 +26,7 @@ const io = new Server(server, {
     origin: [
       "http://localhost:3000",
       "https://devquery-by-webcrafters.vercel.app",
+      "https://devquery-by-webcrafters.vercel.app/chat",
       process.env.WEB_URL_KEY,
     ],
     methods: ["GET", "POST"],
