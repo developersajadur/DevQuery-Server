@@ -21,13 +21,11 @@ const allowedOrigins = [
   "https://devquery-by-webcrafters.vercel.app/chat",
   process.env.WEB_URL_KEY,
 ];
-app.use(
-  cors({
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST"],
+  credentials: true,
+}));
 
 // Socket.IO setup with CORS
 const io = new Server(server, {
@@ -74,7 +72,6 @@ async function startServer() {
         const { room, userEmail, participantEmail, text, time } = msgData;
 
         if (room && userEmail && participantEmail && text) {
-          // Store the message in MongoDB
           try {
             const existingParticipant = await participantsCollection.findOne({
               userEmail: userEmail,
