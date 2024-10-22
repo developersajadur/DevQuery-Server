@@ -53,10 +53,7 @@ async function startServer() {
     await client.connect();
     console.log("Successfully connected to MongoDB!");
 
-    // Define the participants collection here
-    const participantsCollection = client
-      .db("Dev-Query")
-      .collection("participants");
+    const participantsCollection = client.db("Dev-Query").collection("participants");
 
     // Listen for client connection
     io.on("connection", (socket) => {
@@ -74,51 +71,45 @@ async function startServer() {
 
       // Handle receiving a message
       socket.on("message", async (msgData) => {
-        const { room, userId, participantId, text, time } = msgData;
+        const { room, userEmail, participantEmail, text, time } = msgData;
 
-        if (room && userId && participantId && text) {
-          // Broadcast the message to all users in the room
-          io.to(room).emit("message", msgData);
-          console.log(`Message sent to room ${room} by user ${userId}`);
-
-          // Store the message data in MongoDB
+        if (room && userEmail && participantEmail && text) {
+          // Store the message in MongoDB
           try {
             const existingParticipant = await participantsCollection.findOne({
-              userId: userId,
-              "participants.participantsId": participantId,
+              userEmail: userEmail,
+              "participants.participantsId": participantEmail,
             });
 
             if (existingParticipant) {
-              // Add the message to the participant's message array
               await participantsCollection.updateOne(
                 {
-                  userId: userId,
-                  "participants.participantsId": participantId,
+                  userEmail: userEmail,
+                  "participants.participantsId": participantEmail,
                 },
                 {
                   $push: {
                     "participants.$.messages": {
-                      sender: userId,
-                      receiver: participantId,
+                      sender: userEmail,
+                      receiver: participantEmail,
                       text: text,
                       time: time || new Date(),
                     },
                   },
                 }
               );
-              console.log(`Message stored for participant ${participantId}`);
+              console.log(`Message stored for participant ${participantEmail}`);
             } else {
-              // Add the participant and the first message if they don't exist
               await participantsCollection.updateOne(
-                { userId: userId },
+                { userEmail: userEmail },
                 {
                   $push: {
                     participants: {
-                      participantsId: participantId,
+                      participantsId: participantEmail,
                       messages: [
                         {
-                          sender: userId,
-                          receiver: participantId,
+                          sender: userEmail,
+                          receiver: participantEmail,
                           text: text,
                           time: time || new Date(),
                         },
@@ -128,8 +119,12 @@ async function startServer() {
                 },
                 { upsert: true }
               );
-              console.log(`Participant ${participantId} added for user ${userId} with the first message`);
+              console.log(`Participant ${participantEmail} added for user ${userEmail} with the first message`);
             }
+
+            // Broadcast the message to all users in the room
+            io.to(room).emit("message", msgData);
+            console.log(`Message sent to room ${room} by user ${userEmail}`);
           } catch (error) {
             console.error("Error storing participant data:", error);
           }
@@ -137,16 +132,6 @@ async function startServer() {
           console.error("Invalid message data:", msgData);
         }
       });
-
-      app.get("/participants", async (req, res) => {
-        try {
-          const participants = await participantsCollection.find({}).toArray();
-          res.send(participants);
-        } catch (error) {
-          console.error("Error fetching participants data:", error);
-          res.status(500).send("Error fetching participants data");
-        }
-      })
 
       // Handle user disconnection
       socket.on("disconnect", () => {
@@ -160,8 +145,8 @@ async function startServer() {
     });
 
     // Start the server
-    server.listen(4000, () => {
-      console.log("Server is running on port 4000");
+    server.listen(process.env.PORT || 4000, () => {
+      console.log(`Server is running on port ${process.env.PORT || 4000}`);
     });
   } catch (error) {
     console.error("MongoDB connection error:", error);
